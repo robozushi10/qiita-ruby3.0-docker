@@ -1,0 +1,16 @@
+version: '3.7'
+services:
+  rb:
+    build: ./assets/rb
+    image: myruby3.0
+    container_name: piyoruby3.0
+    # ruby slim-buster イメージは CMD["irb"] を実行しているため終了してしまう.
+    # そこで終了しないように tty: true にしておく
+    tty: true
+    volumes:
+      - ./PV/rb/app/:/usr/src/app/
+    command: >
+      bash -c '
+        bundle install
+        while true; do sleep 3600; done
+      '

@@ -1,0 +1,16 @@
+# frozen_string_literal: true
+
+source "https://rubygems.org"
+
+git_source(:github) { |repo_name| "https://github.com/#{repo_name}" }
+
+# gem "rails"
+gem 'faker', '1.7.2'
+gem 'elasticsearch', '7.14.0'
+gem 'elasticsearch-api', '7.14.0'
+gem 'multi_json'
+gem 'faraday'
+gem 'activesupport'
+gem 'minitest'
+gem 'jbuilder'
+gem 'hashie'
