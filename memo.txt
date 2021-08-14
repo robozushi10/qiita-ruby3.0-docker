@@ -1,0 +1,114 @@
+RB-cli-v001.sh と exec-rb-v001.sh について.
+
+なお、今回記すツールは、職場で導入されているツールの挙動を模倣して作成したものであるが、
+職場ではもっと保護処理が多く且つ高機能である.
+
+　
+
+# 手順
+
+## 1. ツールを取得する
+
+```
+$ git clone git@github.com:robozushi10/qiita-ruby3.0-docker
+$ cd qiita-ruby3.0-docker
+$ tree . --charset=C
+.
+|-- RB-cli-v001.sh ........ ユーザ向けバッチ
+|-- exec-rb-v001.sh ....... バッチ処理の詳細
+|-- PV
+|   `-- rb
+|       `-- app
+|           `-- Gemfile
+|-- assets
+|   `-- rb
+|       `-- Dockerfile
+`-- docker-compose.yml
+```
+
+## 2. 実行する
+
+本バッチの主処理は次である.
+
+> docker-compose exec py bash -c <コマンド>
+
+で、上記実行時の付加機能として次を追加しているだけである.
+
+・-p でコンテナ内でのカレントディレクトリを指定できる
+
+・-e で環境変数を指定できる
+
+・-v や -V で実行ログを出す
+
+
+### ホスト側で作成した ./PV/rb/app/a.rb を実行する
+
+```bash
+## コンテナ内の /usr/src/app に移動して、a.rb を実行する.
+## 誤動作を避けたいので、意図的に(絶対パス指定はさせずに) usr/src/app としている
+$ ./RB-cli-v001.sh -p usr/src/app/ bash -c './a.rb'
+```
+
+### 新たなパッケージをインストールする
+
+```bash
+$ vim PV/app/rb/Gemfile
+導入したいパッケージを追加する
+
+$ ./RB-cli-v001.sh -p usr/src/app/ bash -c 'bundle install'
+```
+
+### 実行時のログや環境変数などを表示させたい 
+
+-V を付与する
+
+```bash
+$ ./RB-cli-v001.sh -p usr/src/app/ -V -c  './a.rb'
+[-e] ARGENV  => 
+[-p] ARGPRJ  => usr/src/app/
+[-f] ARGDCY  => docker-compose.yml
+[-t] ARGMODE => 
+[-c] ARGMODE => ruby a.rb
++ eval test -d /usr/src/app/
+++ test -d /usr/src/app/
++ cd /usr/src/app/
++ ruby a.rb
+"Hello Ruby"
++ test '!' -z 1
++ set +x
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+Debug Information 
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+----------------------------------------------------------------
+# pwd
+----------------------------------------------------------------
+/usr/src/app
+----------------------------------------------------------------
+# env
+----------------------------------------------------------------
+HOSTNAME=e74d1ba24834
+LANGUAGE=ja_JP.UTF-8
+RUBY_DOWNLOAD_SHA256=570e7773100f625599575f363831166d91d49a1ab97d3ab6495af44774155c40
+RUBY_VERSION=3.0.2
+PWD=/usr/src/app
+BUNDLE_APP_CONFIG=/usr/local/bundle
+RUBY_MAJOR=3.0
+HOME=/root
+LANG=ja_JP.UTF-8
+BUNDLE_SILENCE_ROOT_WARNING=1
+GEM_HOME=/usr/local/bundle
+TERM=xterm
+SHLVL=1
+PATH=/usr/local/bundle/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+OLDPWD=/usr/src/app
+_=/usr/bin/env
+----------------------------------------------------------------
+$ tree ./PV/rb --charset=C -a
+./PV/rb
+`-- app
+    |-- Gemfile
+    `-- a.rb
+
+1 directory, 2 files
+```
+
